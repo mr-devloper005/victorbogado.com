@@ -29,10 +29,15 @@ function uniquePosts(posts: SitePost[]) {
 }
 
 export default async function HomePage() {
-  const primaryTask = (SITE_CONFIG.tasks.find((task) => task.enabled)?.key || 'article') as TaskKey
+  // The public experience centers on collections/bookmarks — never profiles —
+  // even though profile is also an enabled task.
+  const primaryTask = (SITE_CONFIG.tasks.find((task) => task.enabled && task.key !== 'profile')?.key || 'sbm') as TaskKey
   const primaryRoute = SITE_CONFIG.taskViews[primaryTask] || `/${primaryTask}`
   const taskFeed: TaskFeedItem[] = await fetchHomeTaskFeed(12, { timeoutMs: 2500 })
-  const primaryPosts = uniquePosts(taskFeed.find(({ task }) => task.key === primaryTask)?.posts || taskFeed.flatMap(({ posts }) => posts)).slice(0, 24)
+  const primaryPosts = uniquePosts(
+    taskFeed.find(({ task }) => task.key === primaryTask)?.posts ||
+      taskFeed.filter(({ task }) => task.key !== 'profile').flatMap(({ posts }) => posts)
+  ).slice(0, 24)
   const timeSections: HomeTimeSection[] = await fetchHomeTimeSections(primaryTask, { limit: 8, timeoutMs: 2500 })
   const baseUrl = SITE_CONFIG.baseUrl.replace(/\/$/, '')
 
@@ -54,7 +59,7 @@ export default async function HomePage() {
       />
       <EditableHomeHero primaryTask={primaryTask} primaryRoute={primaryRoute} posts={primaryPosts} timeSections={timeSections} />
       <div className="mx-auto max-w-6xl px-4 py-6">
-  <Ads slot="header" showLabel eager className="mx-auto w-full" />
+  <Ads slot="in-feed" showLabel eager className="mx-auto w-full" />
 </div>
 
       <EditableStoryRail primaryTask={primaryTask} primaryRoute={primaryRoute} posts={primaryPosts} timeSections={timeSections} />
@@ -62,7 +67,7 @@ export default async function HomePage() {
 
       <EditableTimeCollections primaryTask={primaryTask} primaryRoute={primaryRoute} posts={primaryPosts} timeSections={timeSections} />
       <div className="mx-auto max-w-6xl px-4 py-6">
-  <Ads slot="sidebar" showLabel eager className="mx-auto w-full" />
+  <Ads slot="" showLabel eager className="mx-auto w-full" />
 </div>
       <EditableHomeCta />
       </main>
