@@ -1,19 +1,13 @@
 'use client'
 
-import { Building2, FileText, Image as ImageIcon, Mail, MapPin, Phone, Sparkles, Bookmark } from 'lucide-react'
+import { Building2, FileText, Image as ImageIcon, Mail, MapPin, MessageSquare, Phone, Sparkles, Bookmark, Star } from 'lucide-react'
 import { pagesContent } from '@/editable/content/pages.content'
+import { SITE_CONFIG } from '@/lib/site-config'
 import { getFactoryState } from '@/design/factory/get-factory-state'
 import { getProductKind } from '@/design/factory/get-product-kind'
 import { EditableContactLeadForm } from '@/editable/components/EditableContactLeadForm'
 import { EditableSiteShell } from '@/editable/shell/EditableSiteShell'
-
-const tone = {
-  shell: 'bg-[var(--slot4-page-bg)] text-[var(--slot4-page-text)]',
-  panel: 'border border-[var(--editable-border)] bg-[var(--slot4-surface-bg)]',
-  soft: 'border border-[var(--editable-border)] bg-[var(--slot4-panel-bg)]',
-  muted: 'text-[var(--slot4-muted-text)]',
-  action: 'bg-[var(--slot4-accent-fill)] text-[var(--slot4-on-accent)] hover:opacity-90',
-}
+import { EditableReveal } from '@/editable/components/EditableReveal'
 
 function getLanes(kind: ReturnType<typeof getProductKind>) {
   if (kind === 'directory') {
@@ -38,11 +32,17 @@ function getLanes(kind: ReturnType<typeof getProductKind>) {
     ]
   }
   return [
-    { icon: Bookmark, title: 'Collection submissions', body: 'Suggest resources, boards, and links that deserve a place in the library.' },
-    { icon: Mail, title: 'Resource partnerships', body: 'Coordinate curation projects, reference pages, and link programs.' },
-    { icon: Sparkles, title: 'Curator support', body: 'Need help organizing shelves, collections, or profile-connected boards?' },
+    { icon: Bookmark, title: 'Suggest a resource', body: 'Spotted a link, tool, or reference worth adding? Send it our way for review.' },
+    { icon: Sparkles, title: 'Collection partnerships', body: 'Coordinate curated boards, reference pages, and co-branded link programs.' },
+    { icon: MessageSquare, title: 'Curator support', body: 'Need help organising shelves, collections, or fixing a broken link? We’re here.' },
   ]
 }
+
+const faqs = [
+  { q: 'Is it free to browse?', a: 'Yes — the entire library is free to explore. Create an account only if you want to submit resources.' },
+  { q: 'How do I suggest a link?', a: 'Use the form on this page, or sign up to submit resources directly from your account.' },
+  { q: 'How fast will I hear back?', a: 'Most messages are reviewed within a couple of business days. Resource suggestions are queued for curation.' },
+]
 
 export default function ContactPage() {
   const { recipe } = getFactoryState()
@@ -50,27 +50,67 @@ export default function ContactPage() {
   const lanes = getLanes(productKind)
 
   return (
-    <EditableSiteShell className={tone.shell}>
-      <main className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <section className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--slot4-accent)]">{pagesContent.contact.eyebrow}</p>
-            <h1 className="editable-display mt-4 text-5xl font-semibold tracking-[-0.02em]">{pagesContent.contact.title}</h1>
-            <p className={`mt-5 max-w-2xl text-sm leading-8 ${tone.muted}`}>{pagesContent.contact.description}</p>
-            <div className="mt-8 space-y-4">
-              {lanes.map((lane) => (
-                <div key={lane.title} className={`rounded-sm p-5 ${tone.soft}`}>
-                  <lane.icon className="h-5 w-5 text-[var(--slot4-accent)]" />
-                  <h2 className="editable-display mt-3 text-xl font-semibold">{lane.title}</h2>
-                  <p className={`mt-2 text-sm leading-7 ${tone.muted}`}>{lane.body}</p>
-                </div>
+    <EditableSiteShell>
+      <main className="bg-[var(--slot4-page-bg)] text-[var(--slot4-page-text)]">
+        {/* Hero */}
+        <section className="relative overflow-hidden bg-[var(--slot4-cream)]">
+          <div className="pointer-events-none absolute -left-40 -top-40 h-[32rem] w-[32rem] rounded-full bg-[radial-gradient(closest-side,rgba(211,35,35,0.09),transparent)]" />
+          <div className="relative mx-auto max-w-[var(--editable-container)] px-5 py-16 sm:px-6 sm:py-24 lg:px-8">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[var(--editable-border)] bg-white/70 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.24em] text-[var(--slot4-accent)] backdrop-blur">
+              <Star className="h-3.5 w-3.5 fill-[var(--slot4-accent)]" /> {pagesContent.contact.eyebrow}
+            </span>
+            <h1 className="editable-display mt-6 max-w-3xl text-balance text-4xl font-extrabold leading-[1.05] tracking-[-0.03em] sm:text-5xl lg:text-6xl">
+              {pagesContent.contact.title}
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[var(--slot4-muted-text)]">{pagesContent.contact.description}</p>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-[var(--editable-container)] px-5 py-16 sm:px-6 sm:py-20 lg:px-8">
+          <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+            <div className="space-y-4">
+              {lanes.map((lane, index) => (
+                <EditableReveal key={lane.title} delay={index * 80}>
+                  <div className="group flex items-start gap-4 rounded-[var(--editable-radius-lg)] border border-[var(--editable-border)] bg-[var(--slot4-surface-bg)] p-6 transition duration-500 hover:-translate-y-1 hover:shadow-[var(--editable-shadow)]">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--slot4-accent-soft)] text-[var(--slot4-accent)]">
+                      <lane.icon className="h-6 w-6" />
+                    </span>
+                    <div>
+                      <h2 className="editable-display text-lg font-bold tracking-[-0.01em]">{lane.title}</h2>
+                      <p className="mt-1.5 text-sm leading-7 text-[var(--slot4-muted-text)]">{lane.body}</p>
+                    </div>
+                  </div>
+                </EditableReveal>
               ))}
+              <div className="flex items-center gap-3 rounded-[var(--editable-radius-lg)] border border-[var(--editable-border)] bg-[var(--slot4-panel-bg)] p-6">
+                <Mail className="h-5 w-5 text-[var(--slot4-accent)]" />
+                <p className="text-sm font-medium text-[var(--slot4-muted-text)]">Reach us anytime at <span className="font-semibold text-[var(--slot4-page-text)]">{SITE_CONFIG.domain}</span></p>
+              </div>
+            </div>
+
+            <div className="rounded-[var(--editable-radius-xl)] border border-[var(--editable-border)] bg-[var(--slot4-surface-bg)] p-7 shadow-[var(--editable-shadow)] sm:p-9">
+              <h2 className="editable-display text-2xl font-bold tracking-[-0.01em]">{pagesContent.contact.formTitle}</h2>
+              <p className="mt-2 text-sm text-[var(--slot4-muted-text)]">We read every message. Tell us what you need and we’ll route it to the right place.</p>
+              <EditableContactLeadForm />
             </div>
           </div>
 
-          <div className={`rounded-sm p-7 ${tone.panel}`}>
-            <h2 className="editable-display text-2xl font-semibold">{pagesContent.contact.formTitle}</h2>
-            <EditableContactLeadForm />
+          {/* FAQ */}
+          <div className="mt-20">
+            <div className="max-w-2xl">
+              <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-[var(--slot4-accent)]">Good to know</span>
+              <h2 className="editable-display mt-4 text-3xl font-extrabold tracking-[-0.025em] sm:text-[2.2rem]">Frequently asked</h2>
+            </div>
+            <div className="mt-8 grid gap-5 md:grid-cols-3">
+              {faqs.map((faq, index) => (
+                <EditableReveal key={faq.q} delay={index * 80}>
+                  <div className="h-full rounded-[var(--editable-radius-lg)] border border-[var(--editable-border)] bg-[var(--slot4-surface-bg)] p-6">
+                    <h3 className="editable-display text-base font-bold tracking-[-0.01em]">{faq.q}</h3>
+                    <p className="mt-2.5 text-sm leading-7 text-[var(--slot4-muted-text)]">{faq.a}</p>
+                  </div>
+                </EditableReveal>
+              ))}
+            </div>
           </div>
         </section>
       </main>
